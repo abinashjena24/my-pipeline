@@ -1,0 +1,53 @@
+this is a debug message
+this is a info message
+this is a error msg
+this is a debug message
+this is a info message
+this is a error msg
+2026-09-05 01:59:53,639-__main__-DEBUG-this is a debug message
+2026-09-05 01:59:53,639-__main__-INFO-this is a info message
+2026-09-05 01:59:53,649-__main__-ERROR-this is a error msg
+2026-09-05 02:02:22,498-__main__-DEBUG-this is a debug message
+2026-09-05 02:02:22,498-__main__-INFO-this is a info message
+2026-09-05 02:02:22,498-__main__-ERROR-this is a error msg
+2026-09-05 02:13:46,621-__main__-DEBUG-this is a debug message
+2026-09-05 02:13:46,621-__main__-INFO-this is a info message
+2026-09-05 02:13:46,621-__main__-ERROR-this is a error msg
+2026-09-05 02:14:43,712-__main__-DEBUG-this is a debug message
+2026-09-05 02:14:43,715-__main__-INFO-this is a info message
+2026-09-05 02:14:43,718-__main__-ERROR-this is a error msg
+2026-09-05 02:16:20,472-__main__-DEBUG-this is a debug message
+2026-09-05 02:16:20,472-__main__-INFO-this is a info message
+2026-09-05 02:16:20,472-__main__-ERROR-this is a error msg
+2026-09-05 02:17:10,874-__main__-DEBUG-this is a debug message
+2026-09-05 02:17:10,874-__main__-INFO-this is a info message
+2026-09-05 02:17:10,874-__main__-ERROR-this is a error msg
+2026-09-05 02:17:58,630-__main__-DEBUG-this is a debug message
+2026-09-05 02:17:58,630-__main__-INFO-this is a info message
+2026-09-05 02:17:58,630-__main__-ERROR-this is a error msg
+2026-09-05 02:35:59,082-__main__-DEBUG-this is a debug message
+2026-09-05 02:35:59,082-__main__-INFO-this is a info message
+2026-09-05 02:35:59,082-__main__-ERROR-this is a error msg
+2026-09-05 02:38:36,325-__main__-DEBUG-this is a debug message
+2026-09-05 02:38:36,325-__main__-INFO-this is a info message
+2026-09-05 02:38:36,325-__main__-ERROR-this is a error msg
+2026-09-05 02:51:10,511 - logger - DEBUG - Debugging application
+2026-09-05 02:51:10,512 - logger - INFO - Application started
+2026-09-05 02:51:10,512 - logger - ERROR - Something went wrong
+2026-09-05 21:01:27,813 - __main__ - DEBUG - Debugging application
+2026-09-05 21:01:27,814 - __main__ - INFO - Application started
+2026-09-05 21:01:27,814 - __main__ - ERROR - Something went wrong
+2026-09-06 01:04:29,867 - __main__ - INFO - Application started
+2026-09-06 01:04:29,867 - database - INFO - Connecting to database
+2026-09-06 01:04:29,867 - database - DEBUG - Checking database configuration
+2026-09-06 01:04:29,867 - __main__ - INFO - Application finished
+2026-09-06 01:07:39,944 - __main__ - INFO - Application started
+2026-09-06 01:07:39,945 - database - INFO - Connecting to database
+2026-09-06 01:07:39,945 - database - DEBUG - Checking database configuration
+2026-09-06 01:07:39,945 - database - ERROR - Database connection failed
+Traceback (most recent call last):
+  File "C:\my things\my learning\src\database.py", line 7, in connect_database
+    result=10/0
+           ~~^~
+ZeroDivisionError: division by zero
+2026-09-06 01:07:39,947 - __main__ - INFO - Application finished

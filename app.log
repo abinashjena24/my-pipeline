@@ -1,0 +1,12 @@
+2026-09-16 22:16:10,021 - __main__ - INFO - Logger integration test
+2026-09-16 22:29:26,554 - __main__ - INFO - Training pipeline CLI initialized
+2026-09-16 22:29:26,554 - __main__ - INFO - Configuration path received: C:\my things\my learning\My-pipeline\configs\base-config.yaml
+2026-09-16 23:12:05,634 - __main__ - INFO - Ininitiating ML training pipeline
+2026-09-16 23:12:05,635 - __main__ - INFO - Loaded project:ml_training_pipeline(v1.0.0)
+2026-09-16 23:12:05,636 - __main__ - INFO - Execution seed: 42
+2026-09-16 23:12:05,636 - __main__ - INFO - Target model: random_forest
+2026-09-16 23:12:05,636 - __main__ - INFO - Data source: data/raw/data.csv
+2026-09-16 23:12:05,636 - __main__ - INFO - Target column: target
+2026-09-16 23:12:05,636 - __main__ - INFO - Test size: 0.2
+2026-09-16 23:12:05,640 - __main__ - INFO - Model hyperparameters: n_estimators=100, max_depth=10, random_state=42
+2026-09-16 23:12:05,640 - __main__ - INFO - Configuration validation and pipeline assembly succeeded.
