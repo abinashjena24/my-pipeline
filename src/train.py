@@ -12,9 +12,6 @@ if ROOT_DIR not in sys.path:
 from src.logger import setup_logger
 from configs.config import load_config
 
-setup_logger()
-logger=logging.getLogger(__name__)
-
 def parse_args() -> argparse.Namespace:
     parser=argparse.ArgumentParser(description="Tabular ML model trainig pipeline")
     parser.add_argument("--config",type=str,default=r"C:\my things\my learning\My-pipeline\configs\base-config.yaml",help="Path to the YAML configuration file")
@@ -26,6 +23,7 @@ def parse_args() -> argparse.Namespace:
 
 def run_pipeline(config_path:str,seed:int|None=None,data_path:Path|None=None)->None:
     logger.info("Initiating ML training pipeline")
+    logger.debug(f"Configuration path received: {config_path}")
     try:
         app_config=load_config(config_path)
         if seed is not None:
@@ -41,9 +39,23 @@ def run_pipeline(config_path:str,seed:int|None=None,data_path:Path|None=None)->N
         logger.info(
             f"Target model: {app_config.model.name}"
         )
+        data_file=Path(app_config.data.raw_data_path)
+        
+        if not data_file.is_file():
+            logger.warning(f"Dataset not found: {data_file}")
+            
+            data_file.parent.mkdir(parents=True, exist_ok=True)
 
+        data_file.write_text(
+    "feature1,feature2,target\n"
+    "1,10,0\n"
+    "2,20,1\n"
+    "3,30,0\n"
+    "4,40,1\n"
+)
+            
         logger.info(
-            f"Data source: {app_config.data.raw_data_path}"
+            f"Data source: {data_file}"
         )
 
         logger.info(
@@ -70,6 +82,9 @@ def run_pipeline(config_path:str,seed:int|None=None,data_path:Path|None=None)->N
 
 def main()->None:
     args=parse_args()
+    setup_logger(args.log_level)
+    global logger
+    logger=logging.getLogger(__name__)
     run_pipeline(config_path=args.config,seed=args.seed,data_path=args.data_path)
 if __name__ == "__main__":
     main()
