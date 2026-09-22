@@ -1,4 +1,5 @@
 import logging
+
 from database import connect_database
 from logger import setup_logger
 
