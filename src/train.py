@@ -1,13 +1,17 @@
 import argparse
 import logging
 from pathlib import Path
+import pandas as pd
+from sklearn.ensemble import RandomForestRegressor
+from sklearn.model_selection import train_test_split
 
+from src.pipeline import build_preprocessing
 from configs.config import load_config
 from src.logger import setup_logger
 logger = logging.getLogger(__name__)
 
 def parse_args() -> argparse.Namespace:
-    parser = argparse.ArgumentParser(description="Tabular ML model trainig pipeline")
+    parser = argparse.ArgumentParser(description="Tabu lar ML model trainig pipeline")
     parser.add_argument(
         "--config",
         type=str,
@@ -64,6 +68,18 @@ def run_pipeline(
         )
 
         logger.info(f"Data source: {data_file}")
+        df=pd.read_csv(data_file)
+        logger.info(f"loaded dataset shape:{data_file}")
+        target_column = app_config.data.target_column
+        X = df.drop(columns=[target_column])
+        y = df[target_column]
+
+        logger.info(f"Feature columns: {list(X.columns)}")
+        numerical_features = X.select_dtypes(include="number").columns.tolist()
+        categorical_features = X.select_dtypes(exclude="number").columns.tolist()
+
+        logger.info(f"Numerical features: {numerical_features}")
+        logger.info(f"Categorical features: {categorical_features}")
 
         logger.info(f"Target column: {app_config.data.target_column}")
 
