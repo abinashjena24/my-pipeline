@@ -1,14 +1,15 @@
 
 import logging
-from typing import Dict,List,Optional,Tuple,Self
+from typing import Dict, List, Optional, Tuple
+from typing_extensions import Self
+
 import numpy as np
 import pandas as pd
-from sklearn.base import BaseEstimator,TransformerMixin
-
+from sklearn.base import BaseEstimator, TransformerMixin
 
 logger=logging.getLogger(__name__)
 class IQROutlierCapper(BaseEstimator,TransformerMixin):
-    def __init__(self,columns=None,factor=1.5)->None:
+    def __init__(self,columns: Optional[List[str]] = None,factor: float = 1.5)->None:
         self.columns: Optional[List[str]]=columns
         self.factor: float=factor
         self.caps_: Dict[str, Tuple[float, float]]={}
@@ -32,3 +33,7 @@ class IQROutlierCapper(BaseEstimator,TransformerMixin):
             raise RuntimeError("Transformer has not been fitted yet. Call fit() first.")
         if not isinstance(x,pd.DataFrame):
             raise TypeError("Input X must be a pandas DataFrame.")
+        x_out=x.copy()
+        for col,(lower,upper) in self.caps_.items():
+            x_out[col]=x_out[col].clip(lower=lower,upper=upper)
+        return x_out
