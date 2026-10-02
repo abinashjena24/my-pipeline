@@ -1,11 +1,11 @@
 
 import logging
 from typing import Dict, List, Optional, Tuple
-from typing_extensions import Self
 
 import numpy as np
 import pandas as pd
 from sklearn.base import BaseEstimator, TransformerMixin
+from typing_extensions import Self
 
 logger=logging.getLogger(__name__)
 class IQROutlierCapper(BaseEstimator,TransformerMixin):

@@ -1,13 +1,16 @@
 import argparse
 import logging
 from pathlib import Path
+
 import pandas as pd
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.model_selection import train_test_split
+from sklearn.pipeline import Pipeline
 
-from src.pipeline import build_preprocessing
 from configs.config import load_config
 from src.logger import setup_logger
+from src.pipeline import build_preprocessing
+
 logger = logging.getLogger(__name__)
 
 def parse_args() -> argparse.Namespace:
@@ -69,7 +72,7 @@ def run_pipeline(
 
         logger.info(f"Data source: {data_file}")
         df=pd.read_csv(data_file)
-        logger.info(f"loaded dataset shape:{data_file}")
+        logger.info(f"Loaded dataset shape: {df.shape}")
         target_column = app_config.data.target_column
         X = df.drop(columns=[target_column])
         y = df[target_column]
@@ -80,7 +83,40 @@ def run_pipeline(
 
         logger.info(f"Numerical features: {numerical_features}")
         logger.info(f"Categorical features: {categorical_features}")
+        
+        X_train, X_test, y_train, y_test = train_test_split(
+            X,
+            y,
+            test_size=app_config.data.test_size,
+            random_state=app_config.project.random_seed,
+        )
 
+        logger.info(
+            f"Train shape: {X_train.shape}, Test shape: {X_test.shape}"
+        )
+
+        preprocessor=build_preprocessing(numerical_features=numerical_features,categorical_features=categorical_features,)
+        logger.info("Preprocessing pipeline created successfully.")
+        
+        model = RandomForestRegressor(
+            n_estimators=app_config.model.n_estimators,
+            max_depth=app_config.model.max_depth,
+            random_state=app_config.model.random_state,
+        )
+        
+        pipeline = Pipeline(
+            steps=[
+                ("preprocessor", preprocessor),
+                ("model", model),
+            ]
+        )
+        
+        pipeline.fit(X_train,y_train)
+        logger.info("Model training completed successfully.")
+        
+        test_score=pipeline.score(X_test,y_test)
+        logger.info(f"Test R2 score: {test_score:.4f}")
+        
         logger.info(f"Target column: {app_config.data.target_column}")
 
         logger.info(f"Test size: {app_config.data.test_size}")
