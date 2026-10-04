@@ -3,11 +3,13 @@ import logging
 from pathlib import Path
 
 import pandas as pd
-from sklearn.ensemble import RandomForestRegressor
-from sklearn.model_selection import train_test_split
+from sklearn.base import clone
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.model_selection import StratifiedKFold, train_test_split
 from sklearn.pipeline import Pipeline
 
 from configs.config import load_config
+from src.evaluate import evaluate_classification
 from src.logger import setup_logger
 from src.pipeline import build_preprocessing
 
@@ -62,13 +64,7 @@ def run_pipeline(
         data_file = Path(app_config.data.raw_data_path)
 
         if not data_file.is_file():
-            logger.warning(f"Dataset not found: {data_file}")
-
-            data_file.parent.mkdir(parents=True, exist_ok=True)
-
-        data_file.write_text(
-            "feature1,feature2,target\n1,10,0\n2,20,1\n3,30,0\n4,40,1\n"
-        )
+            raise FileNotFoundError(f"Dataset not found: {data_file}")
 
         logger.info(f"Data source: {data_file}")
         df=pd.read_csv(data_file)
@@ -89,6 +85,7 @@ def run_pipeline(
             y,
             test_size=app_config.data.test_size,
             random_state=app_config.project.random_seed,
+            stratify=y,
         )
 
         logger.info(
@@ -98,7 +95,7 @@ def run_pipeline(
         preprocessor=build_preprocessing(numerical_features=numerical_features,categorical_features=categorical_features,)
         logger.info("Preprocessing pipeline created successfully.")
         
-        model = RandomForestRegressor(
+        model = RandomForestClassifier(
             n_estimators=app_config.model.n_estimators,
             max_depth=app_config.model.max_depth,
             random_state=app_config.model.random_state,
@@ -111,11 +108,93 @@ def run_pipeline(
             ]
         )
         
+        cv= StratifiedKFold(n_splits=5,
+                            shuffle=True,
+                            random_state=app_config.project.random_seed,
+        )
+        
+        fold_metrics: list[dict[str, float]] = []
+        
+        logger.info("Initializng 5-fold stratified cross-validation.")
+        for fold,(train_idx, val_idx) in enumerate(cv.split(X_train,y_train),start=1):
+            
+            X_fold_train = X_train.iloc[train_idx]
+            X_fold_val = X_train.iloc[val_idx]
+
+            y_fold_train = y_train.iloc[train_idx]
+            y_fold_val = y_train.iloc[val_idx]
+            
+            fold_pipeline=clone(pipeline)
+            fold_pipeline.fit(X_fold_train, y_fold_train)
+            
+            y_pred=fold_pipeline.predict(X_fold_val)
+            
+            y_proba = fold_pipeline.predict_proba(X_fold_val)[:,1]
+            
+            logger.info(f"Fold {fold} y_true: {y_fold_val.tolist()}")
+            logger.info(f"Fold {fold} y_proba: {y_proba.tolist()}")
+            
+            metrics = evaluate_classification(
+                y_true=y_fold_val,
+                y_pred=y_pred,
+                y_proba=y_proba,
+            )
+            fold_metrics.append(metrics)
+            logger.info(
+                f"Fold {fold}: "
+                f"accuracy={metrics['accuracy']:.4f}, "
+                f"precision={metrics['precision']:.4f}, "
+                f"recall={metrics['recall']:.4f}, "
+                f"f1={metrics['f1']:.4f}, "
+                f"roc_auc={metrics['roc_auc']:.4f}"
+            )
+            
+        metrics_df = pd.DataFrame(fold_metrics)
+            
+        mean_metrics = metrics_df.mean()
+            
+        logger.info("Cross-validation completed successfully.")
+
+        logger.info(
+            f"Mean Accuracy: {mean_metrics['accuracy']:.4f}"
+        )
+
+        logger.info(
+            f"Mean Precision: {mean_metrics['precision']:.4f}"
+        )
+
+        logger.info(
+            f"Mean Recall: {mean_metrics['recall']:.4f}"
+        )
+
+        logger.info(
+            f"Mean F1: {mean_metrics['f1']:.4f}"
+        )
+
+        logger.info(
+            f"Mean ROC-AUC: {mean_metrics['roc_auc']:.4f}"
+        )
+
+        
         pipeline.fit(X_train,y_train)
         logger.info("Model training completed successfully.")
-        
-        test_score=pipeline.score(X_test,y_test)
-        logger.info(f"Test R2 score: {test_score:.4f}")
+        y_test_pred = pipeline.predict(X_test)
+        y_test_proba = pipeline.predict_proba(X_test)[:, 1]
+
+        test_metrics = evaluate_classification(
+            y_true=y_test,
+            y_pred=y_test_pred,
+            y_proba=y_test_proba,
+        )
+
+        logger.info(
+                f"Test metrics: "
+                f"accuracy={test_metrics['accuracy']:.4f}, "
+                f"precision={test_metrics['precision']:.4f}, "
+                f"recall={test_metrics['recall']:.4f}, "
+                f"f1={test_metrics['f1']:.4f}, "
+                f"roc_auc={test_metrics['roc_auc']:.4f}"
+        )
         
         logger.info(f"Target column: {app_config.data.target_column}")
 
