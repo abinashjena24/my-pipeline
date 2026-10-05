@@ -7,7 +7,10 @@ data:
   target_column: "target"
   test_size: 0.2
 model:
-  name: "random_forest"
-  n_estimators: 100
-  max_depth: 10
-  random_state: 42
+  name: "xgboost"
+  params:
+    n_estimators: 100
+    max_depth: 6
+    learning_rate: 0.05
+    scale_pos_weight: 1.0
+    random_state: 42
