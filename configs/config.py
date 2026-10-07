@@ -1,3 +1,5 @@
+from typing import Any
+
 import yaml
 from pydantic import BaseModel, Field, StrictInt, ValidationError
 
@@ -16,15 +18,25 @@ class DataConfig(BaseModel):
 
 class ModelConfig(BaseModel):
     name: str
-    n_estimators: StrictInt = Field(gt=0)
-    max_depth: int = Field(gt=0)
-    random_state: int
+    params: dict[str, Any]
+
+class SearchSpaceConfig(BaseModel):
+    type: str
+    low: float
+    high: float
+    log: bool = False
 
 
+class TuningConfig(BaseModel):
+    n_trials: StrictInt = Field(gt=0)
+    cv_folds: StrictInt = Field(gt=1)
+    metric: str
+    search_space: dict[str, SearchSpaceConfig]
 class AppConfig(BaseModel):
     project: ProjectConfig
     data: DataConfig
     model: ModelConfig
+    tuning: TuningConfig
 
 
 def load_config(config_path: str = "configs/base-config.yaml") -> AppConfig:
@@ -57,5 +69,4 @@ if __name__ == "__main__":
     print("Test Size:", config.data.test_size)
 
     print("Model:", config.model.name)
-    print("Estimators:", config.model.n_estimators)
-    print("Max Depth:", config.model.max_depth)
+    print("Model Parameters:", config.model.params)         

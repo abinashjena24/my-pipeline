@@ -12,6 +12,7 @@ from configs.config import load_config
 from src.evaluate import evaluate_classification
 from src.logger import setup_logger
 from src.pipeline import build_preprocessing
+from src.tune import run_tuning
 
 logger = logging.getLogger(__name__)
 
@@ -39,6 +40,10 @@ def parse_args() -> argparse.Namespace:
         default="INFO",
         help="Set the logging level",
     )
+    parser.add_argument("--tune",
+                        action="store_true",
+                        help="Run Optuna hyperparameter optimization",
+                        )
 
     return parser.parse_args()
 
@@ -52,7 +57,7 @@ def run_pipeline(
         app_config = load_config(config_path)
         if seed is not None:
             app_config.project.random_seed = seed
-            app_config.model.random_state = seed
+            app_config.model.params["random_state"] = seed
         if data_path is not None:
             app_config.data.raw_data_path = str(data_path)
         logger.info(
@@ -96,11 +101,10 @@ def run_pipeline(
         logger.info("Preprocessing pipeline created successfully.")
         
         model = RandomForestClassifier(
-            n_estimators=app_config.model.n_estimators,
-            max_depth=app_config.model.max_depth,
-            random_state=app_config.model.random_state,
-        )
-        
+            n_estimators=app_config.model.params["n_estimators"],
+             max_depth=app_config.model.params["max_depth"],
+            random_state=app_config.model.params["random_state"],
+            )
         pipeline = Pipeline(
             steps=[
                 ("preprocessor", preprocessor),
@@ -201,12 +205,9 @@ def run_pipeline(
         logger.info(f"Test size: {app_config.data.test_size}")
 
         logger.info(
-            f"Model hyperparameters: "
-            f"n_estimators={app_config.model.n_estimators}, "
-            f"max_depth={app_config.model.max_depth}, "
-            f"random_state={app_config.model.random_state}"
+            "Model hyperparameters: %s",
+            app_config.model.params,
         )
-
         logger.info("Configuration validation and pipeline assembly succeeded.")
     except Exception:
         logger.exception("Fatal error encountered during pipeline startup")
@@ -215,10 +216,62 @@ def run_pipeline(
 
 def main() -> None:
     args = parse_args()
+
     setup_logger(args.log_level)
+
     global logger
     logger = logging.getLogger(__name__)
-    run_pipeline(config_path=args.config, seed=args.seed, data_path=args.data_path)
+
+    if args.tune:
+        app_config = load_config(args.config)
+
+        if args.seed is not None:
+            app_config.project.random_seed = args.seed
+
+        if args.data_path is not None:
+            app_config.data.raw_data_path = str(args.data_path)
+
+        data_file = Path(app_config.data.raw_data_path)
+
+        if not data_file.is_file():
+            raise FileNotFoundError(f"Dataset not found: {data_file}")
+
+        logger.info("Starting Optuna hyperparameter tuning.")
+        logger.info("Data source: %s", data_file)
+        logger.info("Target model: %s", app_config.model.name)
+
+        df = pd.read_csv(data_file)
+
+        target_column = app_config.data.target_column
+        X = df.drop(columns=[target_column])
+        y = df[target_column]
+
+        search_space = {
+            name: config.model_dump()
+            for name, config in app_config.tuning.search_space.items()
+        }
+
+        study = run_tuning(
+            X=X,
+            y=y,
+            model_name=app_config.model.name,
+            base_params=app_config.model.params,
+            search_space=search_space,
+            n_trials=app_config.tuning.n_trials,
+            cv_folds=app_config.tuning.cv_folds,
+            random_seed=app_config.project.random_seed,
+        )
+
+        logger.info("Best ROC-AUC: %.4f", study.best_value)
+        logger.info("Best parameters: %s", study.best_params)
+
+        return
+
+    run_pipeline(
+        config_path=args.config,
+        seed=args.seed,
+        data_path=args.data_path,
+    )
 
 
 if __name__ == "__main__":
