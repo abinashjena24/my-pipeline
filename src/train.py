@@ -4,14 +4,13 @@ from pathlib import Path
 
 import pandas as pd
 from sklearn.base import clone
-from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import StratifiedKFold, train_test_split
 from sklearn.pipeline import Pipeline
 
 from configs.config import load_config
 from src.evaluate import evaluate_classification
 from src.logger import setup_logger
-from src.pipeline import build_preprocessing
+from src.pipeline import build_estimator, build_preprocessing
 from src.tune import run_tuning
 
 logger = logging.getLogger(__name__)
@@ -100,11 +99,9 @@ def run_pipeline(
         preprocessor=build_preprocessing(numerical_features=numerical_features,categorical_features=categorical_features,)
         logger.info("Preprocessing pipeline created successfully.")
         
-        model = RandomForestClassifier(
-            n_estimators=app_config.model.params["n_estimators"],
-             max_depth=app_config.model.params["max_depth"],
-            random_state=app_config.model.params["random_state"],
-            )
+        model = build_estimator(model_name=app_config.model.name,
+                                model_params=app_config.model.params,
+                                )
         pipeline = Pipeline(
             steps=[
                 ("preprocessor", preprocessor),
