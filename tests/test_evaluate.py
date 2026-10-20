@@ -4,7 +4,7 @@ import pytest
 from src.evaluate import evaluate_classification
 
 
-def test_evaluate_classification():
+def test_evaluate_classification() -> None:
     y_true = np.array([0, 0, 1, 1])
     y_pred = np.array([0, 1, 1, 1])
     y_proba = np.array([0.1, 0.6, 0.8, 0.9])
@@ -17,7 +17,7 @@ def test_evaluate_classification():
     assert metrics["f1"] == pytest.approx(0.8)
     assert metrics["roc_auc"] == pytest.approx(1.0)
     
-def test_evaluate_classification_returns_all_metrics():
+def test_evaluate_classification_returns_all_metrics() -> None:
     y_true = np.array([0, 1, 0, 1])
     y_pred = np.array([0, 1, 0, 0])
     y_proba = np.array([0.1, 0.8, 0.2, 0.4])

@@ -18,6 +18,7 @@ dependencies = [
     "xgboost>=3.0.0",
     "lightgbm>=4.0.0",
     "optuna>=5.0.0",
+    "joblib>=1.6.0",
 ]
 
 [tool.setuptools.packages.find]

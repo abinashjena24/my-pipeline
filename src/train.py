@@ -1,6 +1,8 @@
 import argparse
 import logging
+from datetime import datetime, timezone
 from pathlib import Path
+from uuid import uuid4
 
 import pandas as pd
 from sklearn.base import clone
@@ -8,8 +10,10 @@ from sklearn.model_selection import StratifiedKFold, train_test_split
 from sklearn.pipeline import Pipeline
 
 from configs.config import load_config
+from src.artifacts import save_artifacts
 from src.evaluate import evaluate_classification
 from src.logger import setup_logger
+from src.metadata import RunMetadata
 from src.pipeline import build_estimator, build_preprocessing
 from src.tune import run_tuning
 
@@ -205,6 +209,33 @@ def run_pipeline(
             "Model hyperparameters: %s",
             app_config.model.params,
         )
+        
+        
+        run_id = (
+            datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S")
+            + "_"
+            + uuid4().hex[:8]
+        )
+
+        model_path = Path("artifacts") / run_id / "model.joblib"
+
+        metadata = RunMetadata(
+            run_id=run_id,
+            model_name=app_config.model.name,
+            random_seed=app_config.project.random_seed,
+            hyperparameters=app_config.model.params,
+            metrics={key: float(value) for key, value in test_metrics.items()},
+            artifact_path=model_path,
+        )
+
+        run_dir = save_artifacts(
+            pipeline=pipeline,
+            metadata=metadata,
+            output_dir=Path("artifacts"),
+        )
+
+        logger.info("Training artifacts saved to: %s", run_dir)
+
         logger.info("Configuration validation and pipeline assembly succeeded.")
     except Exception:
         logger.exception("Fatal error encountered during pipeline startup")
