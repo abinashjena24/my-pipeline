@@ -94,3 +94,51 @@ def test_validate_batch_reports_invalid_row() -> None:
     assert len(invalid) == 1
     assert invalid.loc[0, "row_index"] == 1
     assert "error" in invalid.columns
+
+
+def test_validate_batch_preserves_original_row_indices() -> None:
+    df = pd.DataFrame(
+        {
+            "feature1": [1, "bad", 3],
+            "feature2": [10, 20, 30],
+        },
+        index=[10, 20, 30],
+    )
+
+    valid, invalid = validate_batch(df)
+
+    assert valid["row_index"].tolist() == [10, 30]
+    assert invalid["row_index"].tolist() == [20]
+
+
+def test_run_inference_preserves_row_count_and_columns() -> None:
+    df = pd.DataFrame({"feature1": [1, 2, 3], "feature2": [10, 20, 30]})
+
+    results = run_inference(df, DummyModel())  # type: ignore[arg-type]
+
+    assert len(results) == len(df)
+    assert results.columns.tolist() == [
+        "feature1",
+        "feature2",
+        "prediction",
+        "probability_class_1",
+    ]
+
+
+def test_validate_batch_rejects_unexpected_category() -> None:
+    df = pd.DataFrame({"feature1": ["unknown"], "feature2": [10]})
+
+    valid, invalid = validate_batch(df)
+
+    assert valid.empty
+    assert len(invalid) == 1
+    assert "error" in invalid.columns
+
+
+def test_run_inference_preserves_input_dataframe() -> None:
+    df = pd.DataFrame({"feature1": [1, 2], "feature2": [10, 20]})
+    original = df.copy(deep=True)
+
+    run_inference(df, DummyModel())  # type: ignore[arg-type]
+
+    pd.testing.assert_frame_equal(df, original)

@@ -2,7 +2,7 @@ import logging
 from pathlib import Path
 
 
-def setup_logger(log_level: str = "INFO")->None:
+def setup_logger(log_level: str = "INFO") -> None:
     root_logger = logging.getLogger()
     root_logger.setLevel(getattr(logging, log_level.upper()))
 

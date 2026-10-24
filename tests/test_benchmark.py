@@ -1,4 +1,3 @@
-
 from typing import Any
 
 import pandas as pd
@@ -38,9 +37,7 @@ def test_benchmark_returns_all_models_and_metrics(
         },
     }
 
-    results = run_benchmark(
-        X, y, params, cv_folds=5, random_seed=42
-    )
+    results = run_benchmark(X, y, params, cv_folds=5, random_seed=42)
 
     assert set(results["model"]) == set(MODEL_NAMES)
     assert len(results) == 3

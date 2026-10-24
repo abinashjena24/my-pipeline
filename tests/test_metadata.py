@@ -1,4 +1,3 @@
-
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -27,7 +26,7 @@ def test_run_metadata_valid_data() -> None:
 
 def test_run_metadata_rejects_missing_fields() -> None:
     with pytest.raises(ValidationError):
-        RunMetadata( # type: ignore[call-arg]
+        RunMetadata(  # type: ignore[call-arg]
             run_id="test-run-002",
             model_name="random_forest",
             random_seed=42,
@@ -38,7 +37,7 @@ def test_run_metadata_rejects_missing_fields() -> None:
 
 def test_run_metadata_rejects_extra_fields() -> None:
     with pytest.raises(ValidationError):
-        RunMetadata( # type: ignore[call-arg]
+        RunMetadata(  # type: ignore[call-arg]
             run_id="test-run-003",
             model_name="random_forest",
             random_seed=42,

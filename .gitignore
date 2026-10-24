@@ -7,3 +7,5 @@ dist/
 logs/*.log
 app.log
 data/raw/data.csv
+# Generated inference outputs
+outputs/

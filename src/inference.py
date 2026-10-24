@@ -45,7 +45,6 @@ def validate_paths(input_path: Path) -> None:
         raise FileNotFoundError(f"Input dataset not found: {input_path}")
 
 
-
 def validate_batch(df: pd.DataFrame) -> tuple[pd.DataFrame, pd.DataFrame]:
     """Separate valid rows from invalid rows while preserving row indices."""
     valid_rows: list[dict[str, object]] = []
@@ -73,16 +72,11 @@ def validate_batch(df: pd.DataFrame) -> tuple[pd.DataFrame, pd.DataFrame]:
 
         try:
             validated = InferenceRow.model_validate(normalized)
-            valid_rows.append(
-                {"row_index": index, **validated.model_dump()}
-            )
+            valid_rows.append({"row_index": index, **validated.model_dump()})
         except ValidationError as exc:
-            invalid_rows.append(
-                {"row_index": index, "error": str(exc)}
-            )
+            invalid_rows.append({"row_index": index, "error": str(exc)})
 
     return pd.DataFrame(valid_rows), pd.DataFrame(invalid_rows)
-
 
 
 def validate_cols(df: pd.DataFrame, expected_cols: list[str]) -> None:

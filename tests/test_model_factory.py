@@ -7,12 +7,14 @@ from src.pipeline import build_estimator
 
 
 def test_build_random_forest() -> None:
-    estimator = build_estimator("random_forest",
-                            {"n_estimators": 10},
+    estimator = build_estimator(
+        "random_forest",
+        {"n_estimators": 10},
     )
-    
+
     assert isinstance(estimator, RandomForestClassifier)
     assert estimator.get_params()["n_estimators"] == 10
+
 
 def test_build_xgboost_with_class_imbalance() -> None:
     estimator = build_estimator(
@@ -41,8 +43,7 @@ def test_build_lightgbm_with_class_imbalance() -> None:
     assert estimator.n_estimators == 10
     assert estimator.get_params()["is_unbalance"] is True
 
+
 def test_unsupported_model_raises_error() -> None:
     with pytest.raises(ValueError, match="Unsupported model"):
-        build_estimator("invalid_model",{})
-
-    
+        build_estimator("invalid_model", {})

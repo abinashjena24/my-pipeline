@@ -7,7 +7,8 @@ from sklearn.pipeline import Pipeline
 
 def save_pipeline(pipeline: Pipeline, path: Path) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
-    joblib.dump(pipeline,path)
+    joblib.dump(pipeline, path)
+
 
 def load_pipeline(path: Path) -> Pipeline:
     if not path.is_file():
@@ -16,5 +17,5 @@ def load_pipeline(path: Path) -> Pipeline:
 
     if not isinstance(loaded, Pipeline):
         raise TypeError("The loaded artifact is not a scikit-learn Pipeline.")
-    
+
     return loaded

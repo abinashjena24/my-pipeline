@@ -24,9 +24,10 @@ def test_preprocessing_pipeline() -> None:
 
     assert transformed.shape[0] == len(data)
     assert transformed.shape[1] > len(numerical_features)
-    
+
+
 def test_preprocessing_pipeline_leakage_safety() -> None:
-        train_data = pd.DataFrame(
+    train_data = pd.DataFrame(
         {
             "age": [20, 21, 22, 23, 24],
             "salary": [20000, 21000, 22000, 23000, 24000],
@@ -34,7 +35,7 @@ def test_preprocessing_pipeline_leakage_safety() -> None:
         }
     )
 
-        test_data = pd.DataFrame(
+    test_data = pd.DataFrame(
         {
             "age": [1000],
             "salary": [1_000_000],
@@ -42,13 +43,13 @@ def test_preprocessing_pipeline_leakage_safety() -> None:
         }
     )
 
-        preprocessor = build_preprocessing(
+    preprocessor = build_preprocessing(
         numerical_features=["age", "salary"],
         categorical_features=["city"],
     )
 
-        preprocessor.fit(train_data)
+    preprocessor.fit(train_data)
 
-        transformed_test = preprocessor.transform(test_data)
+    transformed_test = preprocessor.transform(test_data)
 
-        assert transformed_test.shape[0] == 1
+    assert transformed_test.shape[0] == 1

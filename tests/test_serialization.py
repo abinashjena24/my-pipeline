@@ -1,4 +1,3 @@
-
 from pathlib import Path
 
 import numpy as np
@@ -49,4 +48,3 @@ def test_load_pipeline_missing_file(tmp_path: Path) -> None:
 
     with pytest.raises(FileNotFoundError):
         load_pipeline(missing_path)
-
